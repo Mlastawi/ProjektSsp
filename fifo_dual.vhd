@@ -42,6 +42,8 @@ component ram_dual is
 	);	
 end component;
 
+signal out_en : std_logic;
+
 signal out_pnt  : std_logic_vector( ADDR_WIDTH_F-1 downto 0) := (others =>'0');
 signal in_pnt  : std_logic_vector( ADDR_WIDTH_F-1 downto 0) := (others =>'0');
 
@@ -53,7 +55,11 @@ signal empty_inside : std_logic;
 
 begin
 
-	                                                                                                     
+	--data_out <= data_out_holder when empty_inside = '0';
+	
+	out_en <= '1' when empty_inside = '0' and out_req = '1' else
+			  '0';
+	
 	process(clk_in, rst, clk_out)
 	begin
 		if in_pnt = out_pnt then
@@ -105,7 +111,7 @@ begin
 	end process;	
 
 IN_MEM: ram_dual 	generic map(BIT_WIDTH_F,  ADDR_WIDTH_F,  SIZE_F)
-									port map(data_in, out_pnt, in_pnt, rst, in_req, out_req, clk_out, clk_in, data_out);
+									port map(data_in, out_pnt, in_pnt, rst, in_req, out_en, clk_out, clk_in, data_out);
 	
 	
 end arch;

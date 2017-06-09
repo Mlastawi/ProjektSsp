@@ -57,6 +57,15 @@ architecture arch of CRC_TOP is
 	
 	signal WE_LATCH : std_logic;
 
+	-- wyjsciowe sygnaly rejestrow
+	signal DADR : std_logic_vector(15 downto 0);
+	signal DLEN : std_logic_vector(15 downto 0);
+	signal DBIT : std_logic_vector(15 downto 0);
+	signal CADR : std_logic_vector(15 downto 0);
+	signal CCRC : std_logic_vector(15 downto 0);
+	signal STAT : std_logic_vector(15 downto 0);
+	
+	
 	--sygnaly do synchronizacji zegarow
 	signal START : std_logic;
 	signal START2 : std_logic;
@@ -66,20 +75,26 @@ architecture arch of CRC_TOP is
 	--sygnaly do rozpoczecia transmisji
 	signal AGU_START : std_logic;
 	signal AGU_RESET : std_logic;
-
-	-- wyjsciowe sygnaly rejestrow
-	signal DADR : std_logic_vector(15 downto 0);
-	signal DLEN : std_logic_vector(15 downto 0);
-	signal DBIT : std_logic_vector(15 downto 0);
-	signal CADR : std_logic_vector(15 downto 0);
-	signal CCRC : std_logic_vector(15 downto 0);
-	signal STAT : std_logic_vector(15 downto 0);
+	
+	--synga³y dla FIFO
+	signal full : std_logic;
+	signal empty : std_logic;
+	
+	
+	signal stb_o_int_neg : std_logic;
+	signal we_o_int_neg : std_logic;
+	
+	signal data_to_CRC : std_logic_vector(15 downto 0);
 	
 	--sygna³y dla wbm
 	
 	signal ADDR_OUT : std_logic_vector(15 downto 0);
 	signal data : std_logic_vector(31 downto 0);
+	signal data_in : std_logic_vector(31 downto 0);
 	signal stb_o_int : std_logic;
+	signal we_o_int : std_logic := '0';
+
+	
 
 begin
 
@@ -87,7 +102,7 @@ begin
 	data <= X"0000"&addr_out;
 
 	WBM : entity work.WBM
-		port map(rst_i_m, clk_master, addr_o, dat_o_master, dat_i_master, we_o, sel_o, stb_o_int, ack_i, cyc_o, addr_out, data, '0', agu_start);
+		port map(rst_i_m, clk_master, addr_o, dat_o_master, dat_i_master, we_o, sel_o, stb_o_int, ack_i, cyc_o, addr_out, data, data_in, we_o_int, agu_start);
 
 	WBS : entity work.WBS
 		port map(rst_i_s, clk_slave, addr_i, dat_o_slave, dat_i_slave, we_i, sel_i, stb_i, ack_o, cyc_i, storage_i, ADDR_LATCH, storage_o, ram_enable, WE_LATCH);
@@ -110,8 +125,14 @@ begin
 	agu_reset <= '1';
 	
 	AGU : entity work.AGU
-		port map(DADR, DLEN, stb_o_int, AGU_RESET, AGU_START, '0', ADDR_OUT );
+		port map(DADR, DLEN, stb_o_int, AGU_RESET, AGU_START, full, ADDR_OUT );
 		
+	stb_o_int_neg <= not(stb_o_int);
+	we_o_int_neg <= not(we_o_int);
+		
+	FIFO : entity work.fifo_dual
+		generic map(16, 4, 16)
+		port map(stb_o_int_neg, clk_int, rst_int, we_o_int_neg, '1', data_in(15 downto 0), data_to_CRC, full, empty);
 	
 	START <= '1' when STAT = X"0001" and (Ram_enable ='0' or we_i = '0') else
 			'0';

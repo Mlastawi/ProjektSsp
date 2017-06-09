@@ -18,7 +18,8 @@ entity WBM is
 	CYC_O : out std_logic;
 	
 	addr : in std_logic_vector(15 downto 0);
-	data : in std_logic_vector(31 downto 0);
+	data_out : in std_logic_vector(31 downto 0); --dane które maj¹ byæ wypuszczone na zewn¹trz
+	data_in : out std_logic_vector(31 downto 0); -- dana które maj¹ byæ odczytane do uk³adu
 	we : in std_logic;
 	
 	start : in std_logic
@@ -27,7 +28,6 @@ end WBM;
 
 architecture arch of WBM is
 
-	-- Declarations (optional)
 	signal cyc : std_logic;
 
 begin
@@ -35,9 +35,9 @@ begin
 	SEL_O <= '0';
 	WE_O <= we;
 	addr_O <= addr;
-	-- Process Statement (optional)
 	cyc_o <= cyc;
-	dat_o <= data;
+	dat_o <= data_out;
+	data_in <= dat_i;
 
 	stb_up: process(rst_i, clk_i)
 		begin
@@ -64,18 +64,6 @@ begin
 				end if;
 			end if;
 		end process;
-
-	-- Concurrent Procedure Call (optional)
-
-	-- Concurrent Signal Assignment (optional)
-
-	-- Conditional Signal Assignment (optional)
-
-	-- Selected Signal Assignment (optional)
-
-	-- Component Instantiation Statement (optional)
-
-	-- Generate Statement (optional)
 
 end arch;
 

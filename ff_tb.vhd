@@ -46,7 +46,7 @@ architecture arch of ff_tb is
 begin
 
 master : entity work.WBM 
-port map(rst, clk, addr_o, dat_o, dat_i, we, sel, stb, ack, cyc, addr, data, we_uC, start);
+port map(rst, clk, addr_o, dat_o, dat_i, we, sel, stb, ack, cyc, addr, data, open, we_uC, start);
 
 slave : entity work.CRC_TOP
 port map(
@@ -83,7 +83,7 @@ end process;
 rst <= '0', '1' after 5 ns;
 addr <= X"0000", X"0000" after 7 ns, X"0001" after 31 ns, X"0005" after 60 ns;
 data <= X"00000001", X"00001111" after 31 ns, X"00000001" after 60 ns;
-we_uC <= '1', '0' after 80 ns;
+we_uC <= '1', '0' after 63 ns;
 
 start <= '0', '1' after 7 ns;
 end arch;
