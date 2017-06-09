@@ -1,0 +1,10 @@
+# Ingoring everything
+*
+
+#Except .vhd files
+!*.vhd
+
+#and GitHub config files
+!.gitignore
+!.gitattributes
+
