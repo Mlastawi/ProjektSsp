@@ -56,7 +56,11 @@ begin
 						end if;
 					else
 						CYC <= '1';
+						 STB_O <= '1';
 					end if;
+				else
+					CYC <= '0';
+					STB_O <= '0';
 				end if;
 			end if;
 		end process;

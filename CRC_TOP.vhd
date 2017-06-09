@@ -87,7 +87,7 @@ begin
 	data <= X"0000"&addr_out;
 
 	WBM : entity work.WBM
-		port map(rst_i_m, clk_master, addr_o, dat_o_master, dat_i_master, we_o, sel_o, stb_o_int, ack_i, cyc_o, addr_out, data, '1', agu_start);
+		port map(rst_i_m, clk_master, addr_o, dat_o_master, dat_i_master, we_o, sel_o, stb_o_int, ack_i, cyc_o, addr_out, data, '0', agu_start);
 
 	WBS : entity work.WBS
 		port map(rst_i_s, clk_slave, addr_i, dat_o_slave, dat_i_slave, we_i, sel_i, stb_i, ack_o, cyc_i, storage_i, ADDR_LATCH, storage_o, ram_enable, WE_LATCH);

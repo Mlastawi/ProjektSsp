@@ -40,9 +40,9 @@ signal we_latch : std_logic;
 begin						
 	
 	WBS : entity work.WBS port map(rst_i, clk_i, addr_i, dat_o, dat_i, we_i, sel_i, stb_i, ack_o, cyc_i, data_latch, addr_latch, data_out, ram_en, we_latch);
-	RAM : entity work.SRAM 
+	RAM : entity work.SRAM(ramout) 
 		generic map(BIT_WIDTH, ADDR_WIDTH, RAM_SIZE)
-		port map(clk_i, ram_en, data_latch, open, addr_latch, open, we_latch, rst_i);
+		port map(clk_i, ram_en, data_latch, data_out, addr_latch, open, we_latch, rst_i);
 	
 --	asynch_out(159 downto 140) <= memo();
 	

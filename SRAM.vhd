@@ -53,3 +53,37 @@ end process;
 
 
 end sram;
+
+architecture ramout of sram is
+
+type ram_type is array (RAM_SIZE-1 downto 0) of std_logic_vector(BIT_WIDTH-1 downto 0);
+signal memo : ram_type;
+begin						
+	
+--	asynch_out(159 downto 140) <= memo();
+	
+label_req: for a in ram_type'range generate
+		async_out( (a+1)*BIT_WIDTH  - 1 downto a*BIT_WIDTH ) <= memo(a);
+	 end generate label_req ;
+
+	
+process (clk, rst)									
+begin
+	if(rst = '0') then
+			for i in ram_type'range loop
+				memo(i) <= std_logic_vector(to_unsigned(i,BIT_WIDTH)); 
+			end loop;
+			ram_out <= (others => '0');			
+			
+	elsif(rising_edge(clk)) then
+		if(ram_en = '1') then
+			if r_w='1' then
+				memo( to_integer(unsigned(addres)) ) <= ram_in;
+			else
+				ram_out <= memo( to_integer(unsigned(addres)) );
+			end if;
+		end if;
+	end if;
+end process;
+
+end ramout;
