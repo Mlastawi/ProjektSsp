@@ -82,7 +82,7 @@ end process;
 
 rst <= '0', '1' after 5 ns;
 addr <= X"0000", X"0000" after 7 ns, X"0001" after 31 ns, X"0005" after 60 ns;
-data <= X"00000001", X"00001111" after 31 ns, X"00000001" after 60 ns;
+data <= X"00000008", X"00000002" after 31 ns, X"00000001" after 60 ns;
 we_uC <= '1', '0' after 63 ns;
 
 start <= '0', '1' after 7 ns;

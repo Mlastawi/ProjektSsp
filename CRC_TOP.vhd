@@ -1,5 +1,6 @@
 library ieee;
 use ieee.std_logic_1164.all;
+use ieee.numeric_std.all;
 
 library work;
 use work.all;
@@ -63,6 +64,11 @@ architecture arch of CRC_TOP is
 	signal DBIT : std_logic_vector(15 downto 0);
 	signal CADR : std_logic_vector(15 downto 0);
 	signal CCRC : std_logic_vector(15 downto 0);
+	-- CCRC(0) -> wybór kodu CRC
+	-- CCRC(1) -> "endianowoœæ"
+	-- CCRC(2) -> kolejnosc danych
+	-- CCRC(3,4) -> tryb pracy RAM
+	
 	signal STAT : std_logic_vector(15 downto 0);
 	
 	
@@ -80,11 +86,17 @@ architecture arch of CRC_TOP is
 	signal full : std_logic;
 	signal empty : std_logic;
 	
-	
+	signal fifo_en : std_logic;
 	signal stb_o_int_neg : std_logic;
 	signal we_o_int_neg : std_logic;
 	
 	signal data_to_CRC : std_logic_vector(15 downto 0);
+
+	--sygna³y dla CRC
+	
+	signal CRC_out : std_logic_vector(11 downto 0);
+	signal fin : std_logic;
+	signal CRC_data_req : std_logic;
 	
 	--sygna³y dla wbm
 	
@@ -125,14 +137,17 @@ begin
 	agu_reset <= '1';
 	
 	AGU : entity work.AGU
-		port map(DADR, DLEN, stb_o_int, AGU_RESET, AGU_START, full, ADDR_OUT );
+		port map(DADR, DLEN, stb_o_int, AGU_RESET, AGU_START, full, CCRC(2), fifo_en, ADDR_OUT);
 		
-	stb_o_int_neg <= not(stb_o_int);
+	stb_o_int_neg <= not(stb_o_int) and fifo_en;
 	we_o_int_neg <= not(we_o_int);
 		
 	FIFO : entity work.fifo_dual
 		generic map(16, 4, 16)
-		port map(stb_o_int_neg, clk_int, rst_int, we_o_int_neg, '1', data_in(15 downto 0), data_to_CRC, full, empty);
+		port map(clk_master, clk_int, rst_int, stb_o_int_neg, CRC_data_req, data_in(15 downto 0), data_to_CRC, full, empty);
+	
+	CRC_CALC : entity work.crc_calc
+		port map(clk_int, rst_int, CCRC(1), data_to_CRC, unsigned(DLEN), start2, CCRC(0), empty, CRC_out, fin, CRC_data_req);
 	
 	START <= '1' when STAT = X"0001" and (Ram_enable ='0' or we_i = '0') else
 			'0';

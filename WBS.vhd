@@ -39,7 +39,7 @@ architecture arch of WBS is
 	
 
 begin
-
+	DAT_O <= data_out;
 process(CLK_I) --DODAÆ RESET ASYNCHRONICZNY
 begin
 	if rising_edge(CLK_I) then
@@ -50,6 +50,7 @@ begin
 						--Ram_enable <= '1';
 						ADDR_LATCH <= ADDR_I;
 						we_latch <= we_i;
+						--DAT_O <= data_out;
 					end if;
 			--if Wait_state = '1' then
 					ACK <= '1';
@@ -66,9 +67,9 @@ begin
 					ADDR_LATCH <= ADDR_I;
 					Ram_enable <= '1';	
 					we_latch <= we_i;
-				else
+				--else
 					
-					DAT_O <= data_out;
+					--DAT_O <= data_out;
 					--Ram_enable <= '0';
 				end if;
 		elsif WE_I = '0' then

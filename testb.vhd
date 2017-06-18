@@ -33,8 +33,8 @@ ram_out1 : entity work.ram_out
 generic map(16,16,1024)
 port map(rst_tb, clk_tb, addr_tb, dat_i(15 downto 0), dat_o(15 downto 0), we, sel, stb, ack, cyc);
 
-agu1 : entity work.agu
-port map(addr_0, len, stb, rst_tb, start_tb, '0', addr);
+--agu1 : entity work.agu
+--port map(addr_0, len, stb, rst_tb, start_tb, '0', addr);
 
 --wbm1 : entity work.wbm
 --port map(rst_tb, clk_tb, addr_tb, dat_o, dat_i, we, sel, stb, ack, cyc, addr, start_tb);

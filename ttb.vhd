@@ -11,7 +11,7 @@ end ttb;
 architecture arch of ttb is
 
 	signal data_in : std_logic_vector(15 downto 0);
-	signal len : std_logic_vector(15 downto 0) := X"0001";
+	signal len : std_logic_vector(15 downto 0) := X"0002";
 	signal clk : std_logic := '0';	
 	signal rst : std_logic;
 	signal endiannes : std_logic;
@@ -22,7 +22,7 @@ architecture arch of ttb is
 
 begin
 
-CALC : entity work.CRC_CALC port map(clk, rst, endiannes, data_in, len, start, crc_type, data_out, finish);
+CALC : entity work.CRC_CALC port map(clk, rst, endiannes, data_in, unsigned(len), start, crc_type, '0', data_out, finish, open);
 
 process
 begin
@@ -30,7 +30,7 @@ begin
 	wait for 2 ns;
 end process;
 
-data_in <= X"0A50";
+data_in <= X"aaaa";
 START <= '0', '1' after 2 ns;
 rst <= '0', '1' after 2 ns;
 endiannes <= '0';
