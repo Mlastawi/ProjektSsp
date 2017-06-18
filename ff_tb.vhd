@@ -59,7 +59,7 @@ rst, clk_master, addr_o_master, dat_o_master, dat_i_master, we_o, sel_o, stb_o, 
 );
 
 ram_out1 : entity work.ram_out 
-generic map(16,16,1024)
+generic map(16,16,4096)
 port map(rst, clk_master, addr_o_master, dat_i_master(15 downto 0), dat_o_master(15 downto 0), we_o, sel_o, stb_o, ack_i, cyc_o);
 
 process
@@ -81,9 +81,9 @@ begin
 end process;
 
 rst <= '0', '1' after 5 ns;
-addr <= X"0000", X"0000" after 7 ns, X"0001" after 31 ns, X"0005" after 60 ns;
-data <= X"00000008", X"00000002" after 31 ns, X"00000001" after 60 ns;
-we_uC <= '1', '0' after 63 ns;
+addr <= X"0000", X"0000" after 7 ns, X"0001" after 28 ns, X"0004" after 45 ns, X"0003" after 63 ns, X"0005" after 81 ns;
+data <= X"00000030", X"0000000C" after 31 ns, X"00000004" after 45 ns, X"00000FFF" after 63 ns, X"00000001" after 81 ns;
+we_uC <= '1', '0' after 100 ns;
 
 start <= '0', '1' after 7 ns;
 end arch;

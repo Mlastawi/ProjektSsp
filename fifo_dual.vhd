@@ -87,11 +87,11 @@ begin
 			--out_pnt <= min_pnt;
 			--data_out <= (others => '0');
 		elsif(rising_edge(clk_in) and in_req = '1'and full_inside = '0') then
-			if(in_pnt = max_pnt) then
-				in_pnt <= ( others => '0' );
-			else
+			--if(in_pnt = max_pnt) then
+			--	in_pnt <= ( others => '0' );
+			--else
 				in_pnt <= in_pnt + 1 ;
-			end if;
+			--end if;
 	 	end if;
 	end process;	
 	
@@ -102,11 +102,11 @@ begin
 			out_pnt <= ( others => '0' );
 			--data_out <= (others => '0');
 		elsif(rising_edge(clk_out) and out_req = '1' and empty_inside = '0') then
-			if(out_pnt = max_pnt) then
-				out_pnt <= ( others => '0' );
-			else
+			--if(out_pnt = max_pnt) then
+				--out_pnt <= ( others => '0' );
+			--else
 				out_pnt <= out_pnt + 1 ;
-			end if;
+			--end if;
 	 	end if;
 	end process;	
 

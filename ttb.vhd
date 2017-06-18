@@ -22,7 +22,7 @@ architecture arch of ttb is
 
 begin
 
-CALC : entity work.CRC_CALC port map(clk, rst, endiannes, data_in, unsigned(len), start, crc_type, '0', data_out, finish, open);
+--CALC : entity work.CRC_CALC port map(clk, rst, endiannes, data_in, unsigned(len), start, crc_type, '0', data_out, finish, open);
 
 process
 begin

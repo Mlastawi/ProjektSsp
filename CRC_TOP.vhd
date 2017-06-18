@@ -68,6 +68,7 @@ architecture arch of CRC_TOP is
 	-- CCRC(1) -> "endianowoœæ"
 	-- CCRC(2) -> kolejnosc danych
 	-- CCRC(3,4) -> tryb pracy RAM
+	-- CCRC(5) -> obliczenie kodu/sprawdzenie poprawnoœci
 	
 	signal STAT : std_logic_vector(15 downto 0);
 	
@@ -78,25 +79,27 @@ architecture arch of CRC_TOP is
 	signal CRC_ACK : std_logic := '0';
 	signal CRC_ACK2 : std_logic := '0';
 	
-	--sygnaly do rozpoczecia transmisji
+	--sygnaly dla AGU
 	signal AGU_START : std_logic;
-	signal AGU_RESET : std_logic;
+	signal cmode : std_logic;
+	signal agu_fin : std_logic;
 	
 	--synga³y dla FIFO
 	signal full : std_logic;
 	signal empty : std_logic;
 	
-	signal fifo_en : std_logic;
+	signal fifo_in_en : std_logic;
+	signal fifo_out_en : std_logic;
 	signal stb_o_int_neg : std_logic;
-	signal we_o_int_neg : std_logic;
 	
 	signal data_to_CRC : std_logic_vector(15 downto 0);
 
 	--sygna³y dla CRC
 	
 	signal CRC_out : std_logic_vector(11 downto 0);
-	signal fin : std_logic;
+	signal CRC_fin : std_logic;
 	signal CRC_data_req : std_logic;
+	signal CRC_data_en : std_logic;
 	
 	--sygna³y dla wbm
 	
@@ -105,24 +108,26 @@ architecture arch of CRC_TOP is
 	signal data_in : std_logic_vector(31 downto 0);
 	signal stb_o_int : std_logic;
 	signal we_o_int : std_logic := '0';
+	signal wbm_start : std_logic;
 
+	signal fin : std_logic;
 	
 
 begin
 
 	stb_o <= stb_o_int;
-	data <= X"0000"&addr_out;
+	data <= X"00000"&CRC_out;
+	wbm_start <= (not(agu_fin) and agu_start) or fin;
+	
 
 	WBM : entity work.WBM
-		port map(rst_i_m, clk_master, addr_o, dat_o_master, dat_i_master, we_o, sel_o, stb_o_int, ack_i, cyc_o, addr_out, data, data_in, we_o_int, agu_start);
+		port map(rst_i_m, clk_master, addr_o, dat_o_master, dat_i_master, we_o, sel_o, stb_o_int, ack_i, cyc_o, addr_out, data, data_in, fin, wbm_start);
 
 	WBS : entity work.WBS
 		port map(rst_i_s, clk_slave, addr_i, dat_o_slave, dat_i_slave, we_i, sel_i, stb_i, ack_o, cyc_i, storage_i, ADDR_LATCH, storage_o, ram_enable, WE_LATCH);
 		
 	register_bank : entity work.register_bank
-		port map(CLK_slave, RAM_ENABLE, STORAGE_I, STORAGE_O, ADDR_LATCH, WE_LATCH, RST_I_s, DADR, DLEN, DBIT, CADR, CCRC, STAT);
-	
-	
+		port map(CLK_slave, RAM_ENABLE, STORAGE_I, STORAGE_O, ADDR_LATCH, WE_LATCH, rst_int, DADR, DLEN, DBIT, CADR, CCRC, STAT);
 	
 	--synchronizacja
 	DD_1 : entity work.DOUBLE_D
@@ -132,22 +137,22 @@ begin
 	
 	--prawa strona uk³adu
 	controler : entity work.CRC_CONTROLER
-		port map(CLK_INT, START2, CRC_ACK, AGU_START);
-	
-	agu_reset <= '1';
-	
+		port map(CLK_INT, clk_master, rst_int, START2, CRC_ACK, AGU_START, wbm_start, full, empty, stb_o_int, fifo_in_en, CRC_fin, fin, cmode, CRC_data_req, CRC_data_en);
+		
 	AGU : entity work.AGU
-		port map(DADR, DLEN, stb_o_int, AGU_RESET, AGU_START, full, CCRC(2), fifo_en, ADDR_OUT);
+		port map(DADR, DLEN, CADR, stb_o_int, rst_int, AGU_START, full, CCRC(2), cmode, agu_fin, ADDR_OUT);
 		
-	stb_o_int_neg <= not(stb_o_int) and fifo_en;
-	we_o_int_neg <= not(we_o_int);
+	stb_o_int_neg <= not(stb_o_int) and fifo_in_en;
 		
+		
+	fifo_out_en <= CRC_data_req xor CRC_data_en;
+	
 	FIFO : entity work.fifo_dual
 		generic map(16, 4, 16)
-		port map(clk_master, clk_int, rst_int, stb_o_int_neg, CRC_data_req, data_in(15 downto 0), data_to_CRC, full, empty);
+		port map(clk_master, clk_int, rst_int, stb_o_int_neg, fifo_out_en, data_in(15 downto 0), data_to_CRC, full, empty);
 	
 	CRC_CALC : entity work.crc_calc
-		port map(clk_int, rst_int, CCRC(1), data_to_CRC, unsigned(DLEN), start2, CCRC(0), empty, CRC_out, fin, CRC_data_req);
+		port map(clk_int, rst_int, CCRC(1), data_to_CRC, unsigned(DLEN), start2, CCRC(0), empty, CRC_data_en, CCRC(5), CRC_out, CRC_fin, CRC_data_req);
 	
 	START <= '1' when STAT = X"0001" and (Ram_enable ='0' or we_i = '0') else
 			'0';
